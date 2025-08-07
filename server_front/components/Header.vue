@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import {onMounted} from 'vue'
+import {onMounted, computed, ref} from 'vue'
 import {useAuthStore} from '~/stores/auth'
 import {useNotificationStore} from '~/stores/notification'
-import Avatar from 'primevue/avatar'
 
 const notificationStore = useNotificationStore()
 const authStore = useAuthStore()

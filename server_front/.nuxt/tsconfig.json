@@ -104,7 +104,7 @@
         "./imports"
       ],
       "#app-manifest": [
-        "./manifest/meta/dev.json"
+        "./manifest/meta/dev"
       ],
       "#components": [
         "./components"
@@ -162,6 +162,7 @@
     "../dist",
     "../.data",
     "../node_modules",
+    "../../node_modules",
     "../node_modules/nuxt/node_modules",
     "../node_modules/@primevue/nuxt-module/node_modules",
     "../node_modules/@pinia/nuxt/node_modules",

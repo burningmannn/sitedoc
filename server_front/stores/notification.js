@@ -1,7 +1,5 @@
 import {defineStore} from 'pinia'
 
-const config = useRuntimeConfig()
-
 export const useNotificationStore = defineStore('notification', {
     state: () => ({
         notifications: []
@@ -15,6 +13,7 @@ export const useNotificationStore = defineStore('notification', {
 
     actions: {
         async fetchNotifications() {
+            const config = useRuntimeConfig()
             try {
                 this.notifications = await $fetch(`${config.public.apiBase}/api/notification/`, {
                     credentials: 'include'

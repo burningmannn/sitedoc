@@ -1,5 +1,3 @@
-const config = useRuntimeConfig()
-
 type User = {
     id: number
     name: string
@@ -22,6 +20,7 @@ export const useAuthStore = defineStore('auth', {
             this.user = userData
         },
         async checkAuth() {
+            const config = useRuntimeConfig()
             try {
                 this.user = await $fetch(`${config.public.apiBase}/api/auth/check_auth`, {
                     credentials: 'include'
@@ -33,6 +32,7 @@ export const useAuthStore = defineStore('auth', {
             }
         },
         async logout() {
+            const config = useRuntimeConfig()
             try {
                 await $fetch(`${config.public.apiBase}/api/auth/logout`, {
                     method: 'POST',
