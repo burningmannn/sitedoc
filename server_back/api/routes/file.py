@@ -194,21 +194,45 @@ async def get_files_in_work(db: AsyncSession = Depends(get_async_session), user:
 @router.put("/update/{file_id}")
 async def update_file(file_id: int, data: dict = Body(...), db: AsyncSession = Depends(get_async_session),
                       user: User = Depends(get_current_user)):
+    # Отладочная информация
+    action_logger.info(f'Попытка обновления файла {file_id} пользователем {user.id} (админ: {user.admin})')
+    action_logger.info(f'Данные для обновления: {data}')
+    
     doc = await db.get(Document, file_id)
-    if not doc or doc.uploaded_by != user.id:
-        error_logger.error(f'Ошибка обновления файла: {file_id}')
-        raise HTTPException(status_code=404, detail="Файл не найден или доступ запрещён")
+    if not doc:
+        error_logger.error(f'Файл {file_id} не найден в базе данных')
+        raise HTTPException(status_code=404, detail="Файл не найден")
+    
+    action_logger.info(f'Файл найден. Владелец: {doc.uploaded_by}, Текущий пользователь: {user.id}')
+    
+    # Проверяем права доступа: владелец файла или админ
+    if doc.uploaded_by != user.id and not user.admin:
+        error_logger.error(f'Пользователь {user.id} не имеет прав на редактирование файла {file_id}. Владелец: {doc.uploaded_by}, Админ: {user.admin}')
+        raise HTTPException(status_code=403, detail="Недостаточно прав для редактирования файла")
 
-    if "doc_type" in data:
+    # Поддерживаем как новый формат (doc_type_id), так и старый (doc_type)
+    if "doc_type_id" in data and data["doc_type_id"] is not None:
+        doc_type = await db.get(DocType, data["doc_type_id"])
+        if not doc_type:
+            raise HTTPException(status_code=404, detail="Тип документа не найден")
+        doc.doc_type_id = doc_type.id
+    elif "doc_type" in data:
         doc_type = await db.get(DocType, data["doc_type"]["id"])
         if not doc_type:
             raise HTTPException(status_code=404, detail="Тип документа не найден")
-        doc.doc_type = doc_type
+        doc.doc_type_id = doc_type.id
 
-    if "responsible" in data:
+    # Поддерживаем как новый формат (responsible_id), так и старый (responsible)
+    if "responsible_id" in data and data["responsible_id"] is not None:
+        responsible = await db.get(Department, data["responsible_id"])
+        if responsible:
+            doc.responsible_id = responsible.id
+        else:
+            raise HTTPException(status_code=404, detail="Ответственный не найден")
+    elif "responsible" in data:
         responsible = await db.get(Department, data["responsible"].get("id"))
         if responsible:
-            doc.responsible = responsible
+            doc.responsible_id = responsible.id
         else:
             raise HTTPException(status_code=404, detail="Ответственный не найден")
 

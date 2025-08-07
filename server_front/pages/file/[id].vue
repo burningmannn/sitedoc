@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 import { useAuthStore } from '~/stores/auth'
@@ -136,21 +136,31 @@ onMounted(async () => {
 })
 
 async function updateFileInfo() {
-  editedFile.value.permanent = permanent.value
-
   try {
+    // Подготавливаем данные для отправки на сервер
+    const updateData = {
+      original_filename: editedFile.value.original_filename,
+      doc_number: editedFile.value.doc_number,
+      doc_type_id: selectedDocTypeId.value,
+      responsible_id: selectedDepartmentId.value,
+      permanent: permanent.value,
+      valid_until: editedFile.value.valid_until
+    }
+
+    console.log('Отправляем данные:', updateData)
+
     await $fetch(`${config.public.apiBase}/api/file/update/${fileId}`, {
       method: 'PUT',
-      body: editedFile.value,
+      body: updateData,
       credentials: 'include'
     })
-    console.log(editedFile.value)
 
     toast.add({ severity: 'success', summary: 'Обновлено', detail: 'Информация обновлена', life: 3000 })
     isEditing.value = false
     await fetchFileInfo();
   } catch (e) {
-    toast.add({ severity: 'error', summary: 'Ошибка', detail: `Не удалось обновить ${e}`, life: 3000 })
+    console.error('Ошибка при обновлении:', e)
+    toast.add({ severity: 'error', summary: 'Ошибка', detail: `Не удалось обновить файл: ${e?.data?.detail || e.message || 'Неизвестная ошибка'}`, life: 4000 })
   }
 }
 

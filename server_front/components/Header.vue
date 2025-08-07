@@ -9,12 +9,16 @@ const user = computed(() => authStore.user)
 const visible = ref(false);
 
 onMounted(() => {
-  notificationStore.fetchNotifications()
-
-  // Обновление уведомлений каждые 30 секунд
-  setInterval(() => {
+  // Plugin уже проверил авторизацию при загрузке приложения
+  // Уведомления загружаются только если пользователь авторизован
+  if (user.value) {
     notificationStore.fetchNotifications()
-  }, 30000)
+
+    // Обновление уведомлений каждые 30 секунд
+    setInterval(() => {
+      notificationStore.fetchNotifications()
+    }, 30000)
+  }
 })
 
 
@@ -23,6 +27,11 @@ const getInitials = (fullName: string | null | undefined): string => {
   const parts = fullName.trim().split(' ');
   const initials = parts.map(p => p.charAt(0).toUpperCase()).join('');
   return initials || 'U';
+};
+
+const handleLogout = async () => {
+  visible.value = false; // Закрываем drawer
+  await authStore.logout();
 };
 
 </script>
@@ -72,11 +81,11 @@ const getInitials = (fullName: string | null | undefined): string => {
                 <NuxtLink class="ml-2" @click="visible = false" to="/file/working_files">Назначенные файлы</NuxtLink>
               </div>
               <div v-if="authStore.user" class="p-4 m-auto content-center">
-                <Button  @click="authStore.logout">Выйти</Button>
+                <Button  @click="handleLogout">Выйти</Button>
               </div>
             </Drawer>
           </div>
-          <div v-else="user">
+          <div v-else>
             <NuxtLink to="/login">
               <Button>Войти</Button>
             </NuxtLink>

@@ -94,6 +94,7 @@ class UserCreateSchema(BaseModel):
     password: str
     name: str
     department_id: int
+    admin: Optional[bool] = False
 
     class Config:
         orm_mode = True
@@ -104,6 +105,7 @@ class UserUpdateSchema(BaseModel):
     password: Optional[str] = None
     name: Optional[str] = None
     department_id: Optional[int] = None
+    admin: Optional[bool] = None
 
     create_at: Optional[str] = None
     id: Optional[int] = None

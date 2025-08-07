@@ -23,6 +23,7 @@ type NuxtAppInjections =
   InjectionType<typeof import("../../node_modules/@primevue/nuxt-module/dist/runtime/plugin.client.js")> &
   InjectionType<typeof import("../../node_modules/nuxt/dist/app/plugins/dev-server-logs.js")> &
   InjectionType<typeof import("../../node_modules/nuxt/dist/app/plugins/check-if-layout-used.js")> &
+  InjectionType<typeof import("../../plugins/auth-check.client")> &
   InjectionType<typeof import("../../plugins/piniaPersist.client")>
 
 declare module '#app' {

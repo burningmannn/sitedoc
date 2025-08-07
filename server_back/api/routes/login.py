@@ -40,8 +40,9 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_async_session)):
 
     response = JSONResponse(content={
         "id": db_user.id,
-        "username": db_user.name,
-        "email": db_user.name,
+        "username": db_user.username,
+        "name": db_user.name,
+        "admin": db_user.admin,
     },
     )
     # response.set_cookie(key="token", value=token, httponly=True, secure=True, samesite='none')
@@ -105,9 +106,9 @@ async def get_me(request: Request, db: AsyncSession = Depends(get_async_session)
 
     return {
         "id": db_user.id,
+        "username": db_user.username,
         "name": db_user.name,
-        "email": db_user.username,
-        "role": db_user.admin
+        "admin": db_user.admin
     }
 
 
@@ -156,7 +157,8 @@ async def register_user(
         username=user_data.username,
         password=get_password_hash(user_data.password),
         name=user_data.name,
-        department_id=user_data.department_id
+        department_id=user_data.department_id,
+        admin=getattr(user_data, 'admin', False)  # Поддержка admin поля
     )
     db.add(new_user)
     await db.commit()

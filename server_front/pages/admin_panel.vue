@@ -28,7 +28,7 @@ const showAllDocTypes = ref(false)
 const showAllAssign = ref(false)
 const users = ref([])
 const editDialogVisible = ref(false)
-const editedUser = ref({id: null, name: '', username: '', department_id: '', password: ''})
+const editedUser = ref({id: null, name: '', username: '', department_id: '', password: '', admin: false})
 const selectedUser = ref(null)
 const selectedDepartment = ref<string | null>(null)
 const log_actions = ref("Загрузка...")
@@ -302,7 +302,8 @@ const user = ref({
   username: '',
   password: '',
   name: '',
-  department_id: null
+  department_id: null,
+  admin: false
 })
 
 const registerUser = async () => {
@@ -322,7 +323,7 @@ const registerUser = async () => {
       credentials: 'include'
     })
     toast.add({severity: 'success', summary: 'Пользователь создан', life: 3000})
-    user.value = {username: '', password: '', name: '', department_id: null}
+    user.value = {username: '', password: '', name: '', department_id: null, admin: false}
   } catch (e) {
     toast.add({severity: 'error', summary: 'Ошибка', detail: 'Не удалось создать пользователя', life: 3000})
     console.error(e)
@@ -551,6 +552,10 @@ onMounted(() => {
               placeholder="Выберите службу"
               class="w-full"
           />
+          <div class="flex items-center gap-2 mt-2">
+            <Checkbox v-model="user.admin" binary />
+            <label>Администратор</label>
+          </div>
           <Button class="mt-4" label="Зарегистрировать" icon="pi pi-user-plus" @click="registerUser"/>
         </div>
       </div>
@@ -583,6 +588,12 @@ onMounted(() => {
 
           <Column field="id" sortable header="ID"/>
           <Column field="name" sortable header="Имя"/>
+          <Column header="Роль">
+            <template #body="slotProps">
+              <Tag :value="slotProps.data.admin ? 'Админ' : 'Пользователь'" 
+                   :severity="slotProps.data.admin ? 'success' : 'info'" />
+            </template>
+          </Column>
           <Column header="Действия" :exportable="false">
             <template #body="slotProps">
               <Button
@@ -617,6 +628,10 @@ onMounted(() => {
                 placeholder="Выберите службу"
                 class="w-full"
             />
+            <div class="flex items-center gap-2 mt-2">
+              <Checkbox v-model="editedUser.admin" binary />
+              <label>Администратор</label>
+            </div>
             <Button label="Сохранить" class="mt-4" @click="saveUser"/>
           </div>
         </Dialog>

@@ -1,4 +1,4 @@
-// middleware/auth.global.ts
+// middleware/admin.ts - проверка прав администратора
 import {useAuthStore} from "~/stores/auth";
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
@@ -8,7 +8,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         await auth.checkAuth()
     }
 
-    if (!auth.user?.admin) {
+    if (!auth.user || !auth.user.admin) {
         return navigateTo('/error_page/403')
     }
 })

@@ -1,6 +1,7 @@
 <script setup lang="js">
 import {onMounted} from "vue";
 import {useAuthStore} from "~/stores/auth.js";
+
 const config = useRuntimeConfig()
 const authStore = useAuthStore()
 
@@ -11,21 +12,9 @@ useHead({
   ]
 })
 
-async function check() {
-  try {
-    const res = await $fetch(`${config.public.apiBase}/api/auth/check_auth`, {
-      credentials: 'include'
-    })
-    user.value = res
-  } catch {
-    user.value = null
-  }
-}
-
-console.log(authStore.user)
-
+// НЕ проверяем авторизацию автоматически на главной странице
 onMounted(() => {
-
+  // Главная страница доступна всем
 })
 </script>
 
@@ -33,7 +22,6 @@ onMounted(() => {
   <div class="selection">
     <div class="w-full mx-auto px-20">
       <Table />
-      <TestTable />
     </div>  
   </div>
   <div class="selection">

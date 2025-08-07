@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
+import { useAuthStore } from '~/stores/auth'
 const config = useRuntimeConfig()
 
 const credentials = reactive({
@@ -48,19 +49,8 @@ async function login() {
   }
 }
 
-async function check() {
-  try {
-    const res = await $fetch(`${config.public.apiBase}/api/auth/check_auth`, {
-      credentials: 'include'
-    })
-    user.value = res
-  } catch {
-    user.value = null
-  }
-}
-
 onMounted(() => {
-  check()
+  // Страница входа не требует проверки авторизации
 })
 </script>
 

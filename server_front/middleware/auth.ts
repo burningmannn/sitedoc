@@ -1,4 +1,4 @@
-// middleware/auth.global.ts
+// middleware/auth.ts - НЕ глобальное middleware
 import {useAuthStore} from "~/stores/auth";
 export default defineNuxtRouteMiddleware(async (to, from) => {
     const auth = useAuthStore()
@@ -8,6 +8,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     }
 
     if (!auth.user) {
-        return navigateTo('/error_page/403')
+        return navigateTo('/login')
     }
 })

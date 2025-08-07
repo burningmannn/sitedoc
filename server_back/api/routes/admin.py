@@ -80,6 +80,8 @@ async def update_user(
         user.department_id = user_data.department_id
     if user_data.password:
         user.password = get_password_hash(user_data.password)
+    if user_data.admin is not None:
+        user.admin = user_data.admin
 
     await db.commit()
     await db.refresh(user)
@@ -136,16 +138,23 @@ async def list_responsibles(
     )
     responsibles = result.scalars().all()
 
-    return [
-        {
+    # Фильтруем записи с валидными связями
+    valid_responsibles = []
+    for r in responsibles:
+        if r.user is None or r.department is None:
+            # Логируем проблемные записи
+            errors_logger.warning(f"Найдена запись Responsible с id={r.id}, где user или department равны None. user_id={r.user_id}, department_id={r.department_id}")
+            continue
+        
+        valid_responsibles.append({
             "id": r.id,
             "user_name": r.user.name,
             "user_id": r.user_id,
             "department_id": r.department_id,
-            "department_name": r.department
-        }
-        for r in responsibles
-    ]
+            "department_name": r.department.name
+        })
+    
+    return valid_responsibles
 
 
 @router.put("/doc-type/{id}")
@@ -307,3 +316,40 @@ async def get_error_log(user: User = Depends(get_current_user)):
     if not user.admin:
         raise HTTPException(status_code=403, detail="Нет доступа")
     return read_last_lines(Path("logs/errors.log"), num_lines=300)
+
+
+@router.post("/cleanup-responsibles")
+async def cleanup_invalid_responsibles(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_session)
+):
+    """Очистка таблицы responsibles от записей с несуществующими user_id или department_id."""
+    if not user.admin:
+        raise HTTPException(status_code=403, detail="Нет доступа")
+    
+    # Находим все записи Responsible
+    result = await db.execute(select(Responsible))
+    all_responsibles = result.scalars().all()
+    
+    deleted_count = 0
+    
+    for responsible in all_responsibles:
+        # Проверяем, существует ли пользователь
+        user_result = await db.execute(select(User).where(User.id == responsible.user_id))
+        user_exists = user_result.scalar_one_or_none()
+        
+        # Проверяем, существует ли департамент  
+        dept_result = await db.execute(select(Department).where(Department.id == responsible.department_id))
+        dept_exists = dept_result.scalar_one_or_none()
+        
+        # Если пользователь или департамент не существуют, удаляем запись
+        if not user_exists or not dept_exists:
+            await db.delete(responsible)
+            deleted_count += 1
+            errors_logger.warning(f"Удалена некорректная запись Responsible: id={responsible.id}, user_id={responsible.user_id}, department_id={responsible.department_id}")
+    
+    if deleted_count > 0:
+        await db.commit()
+        action_logger.info(f"Пользователь {user.id} очистил {deleted_count} некорректных записей из таблицы responsibles")
+    
+    return {"message": f"Удалено {deleted_count} некорректных записей", "deleted_count": deleted_count}
