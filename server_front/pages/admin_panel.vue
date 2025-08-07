@@ -19,16 +19,13 @@ const toast = useToast()
 const config = useRuntimeConfig()
 const docTypes = ref([])
 const departments = ref([])
-const newDocType = ref('')
-const newDepartment = ref('')
+
 const responsibles = ref([])
 const confirm = useConfirm();
-const showAllDepartments = ref(false)
-const showAllDocTypes = ref(false)
-const showAllAssign = ref(false)
+
 const users = ref([])
 const editDialogVisible = ref(false)
-const editedUser = ref({id: null, name: '', username: '', department_id: '', password: '', admin: false})
+const editedUser = ref({id: null, name: '', username: '', department_id: null, password: '', admin: false})
 const selectedUser = ref(null)
 const selectedDepartment = ref<string | null>(null)
 const log_actions = ref("Загрузка...")
@@ -60,42 +57,120 @@ async function loadLogErrors() {
 const filters = ref({
   global: {value: null, matchMode: FilterMatchMode.CONTAINS},
 })
-const editingTypeId = ref<number | null>(null)
-const editedTypeName = ref('')
 
-const startEditingDocType = (type: { id: number, name: string }) => {
-  editingTypeId.value = type.id
-  editedTypeName.value = type.name
+// Фильтры для справочников
+const docTypeFilters = ref({
+  global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+})
+const departmentFilters = ref({
+  global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+})
+const responsibleFilters = ref({
+  global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+})
+// Диалоги и редактируемые объекты для справочников
+const docTypeDialogVisible = ref(false)
+const departmentDialogVisible = ref(false)
+
+const editedDocType = ref({id: null, name: ''})
+const editedDepartment = ref({id: null, name: ''})
+
+// Функции для работы с диалогами типов документов
+const openDocTypeDialog = (docType = null) => {
+  if (docType) {
+    editedDocType.value = {...docType}
+  } else {
+    editedDocType.value = {id: null, name: ''}
+  }
+  docTypeDialogVisible.value = true
 }
 
-const cancelEditing = () => {
-  editingTypeId.value = null
-  editedTypeName.value = ''
-}
-
-const saveEditedDocType = async (id: number) => {
+const saveDocType = async () => {
+  if (!editedDocType.value.name.trim()) {
+    toast.add({severity: 'warn', summary: 'Поле не заполнено', detail: 'Введите название типа документа', life: 3000})
+    return
+  }
+  
   try {
-    await $fetch(`${config.public.apiBase}/api/admin/doc-type/${id}`, {
-      method: 'PUT',
-      body: {name: editedTypeName.value}, // теперь FastAPI это примет как JSON
-      credentials: 'include'
-    })
+    if (editedDocType.value.id) {
+      // Редактирование
+      await $fetch(`${config.public.apiBase}/api/admin/doc-type/${editedDocType.value.id}`, {
+        method: 'PUT',
+        body: {name: editedDocType.value.name},
+        credentials: 'include'
+      })
+      toast.add({severity: 'success', summary: 'Обновлено', detail: 'Тип документа обновлен', life: 3000})
+    } else {
+      // Создание
+      await $fetch(`${config.public.apiBase}/api/admin/doc-type`, {
+        method: 'POST',
+        params: {name: editedDocType.value.name},
+        credentials: 'include'
+      })
+      toast.add({severity: 'success', summary: 'Добавлено', detail: 'Тип документа добавлен', life: 3000})
+    }
+    
+    docTypeDialogVisible.value = false
     await fetchData()
-    toast.add({severity: 'success', summary: 'Информация обновлена', life: 3000})
-    editingTypeId.value = null
-    editedTypeName.value = ''
   } catch (e) {
-    toast.add({severity: 'error', summary: 'Ошибка', detail: `Не удалось обновить тип документа ${e}`, life: 3000})
+    toast.add({severity: 'error', summary: 'Ошибка', detail: `Не удалось сохранить тип документа ${e}`, life: 3000})
+  }
+}
+
+// Функции для работы с диалогами служб
+const openDepartmentDialog = (department = null) => {
+  if (department) {
+    editedDepartment.value = {...department}
+  } else {
+    editedDepartment.value = {id: null, name: ''}
+  }
+  departmentDialogVisible.value = true
+}
+
+const saveDepartment = async () => {
+  if (!editedDepartment.value.name.trim()) {
+    toast.add({severity: 'warn', summary: 'Поле не заполнено', detail: 'Введите название службы', life: 3000})
+    return
+  }
+  
+  try {
+    if (editedDepartment.value.id) {
+      // Редактирование
+      await $fetch(`${config.public.apiBase}/api/admin/department/${editedDepartment.value.id}`, {
+        method: 'PUT',
+        params: {name: editedDepartment.value.name},
+        credentials: 'include'
+      })
+      toast.add({severity: 'success', summary: 'Обновлено', detail: 'Служба обновлена', life: 3000})
+    } else {
+      // Создание
+      await $fetch(`${config.public.apiBase}/api/admin/department`, {
+        method: 'POST',
+        params: {name: editedDepartment.value.name},
+        credentials: 'include'
+      })
+      toast.add({severity: 'success', summary: 'Добавлено', detail: 'Служба добавлена', life: 3000})
+    }
+    
+    departmentDialogVisible.value = false
+    await fetchData()
+  } catch (e) {
+    toast.add({severity: 'error', summary: 'Ошибка', detail: `Не удалось сохранить службу ${e}`, life: 3000})
   }
 }
 
 function editUser(user) {
-  editedUser.value = {...user}
+  editedUser.value = {
+    ...user,
+    department_id: user.department ? user.department.id : null
+  }
+  console.log('Редактируемый пользователь:', editedUser.value) // Для отладки
   editDialogVisible.value = true
 }
 
 async function saveUser() {
-  console.log(editedUser.value)
+  console.log('Сохраняем пользователя:', editedUser.value)
+  console.log('department_id:', editedUser.value.department_id)
   try {
     await $fetch(`${config.public.apiBase}/api/admin/users/${editedUser.value.id}`, {
       method: 'PUT',
@@ -266,36 +341,7 @@ const fetchData = async () => {
 
 }
 
-const addDocType = async () => {
-  if (!newDocType.value) return
-  await $fetch(`${config.public.apiBase}/api/admin/doc-type`, {
-    method: 'POST',
-    params: {name: newDocType.value},
-    credentials: 'include'
-  })
-  newDocType.value = ''
-  toast.add({severity: 'success', summary: 'Добавлено', detail: 'Тип документа добавлен', life: 3000})
-  await fetchData()
-}
 
-
-const addDepartment = async () => {
-  if (!newDepartment.value) return
-  try {
-    await $fetch(`${config.public.apiBase}/api/admin/department`, {
-      method: 'POST',
-      params: {name: newDepartment.value},
-      credentials: 'include'
-    })
-    newDepartment.value = ''
-    toast.add({severity: 'success', summary: 'Добавлено', detail: 'Служба добавлена', life: 3000})
-    await fetchData()
-  } catch (e) {
-    toast.add({severity: 'error', summary: 'Ошибка', detail: `Не удалось добавить службу ${e}`, life: 3000})
-    console.error(e)
-  }
-
-}
 
 
 const user = ref({
@@ -324,6 +370,8 @@ const registerUser = async () => {
     })
     toast.add({severity: 'success', summary: 'Пользователь создан', life: 3000})
     user.value = {username: '', password: '', name: '', department_id: null, admin: false}
+    // Обновляем список пользователей после создания
+    await fetchData()
   } catch (e) {
     toast.add({severity: 'error', summary: 'Ошибка', detail: 'Не удалось создать пользователя', life: 3000})
     console.error(e)
@@ -382,97 +430,135 @@ onMounted(() => {
       <h1 class="text-2xl font-semibold mb-6">Справочники</h1>
       <div class="flex gap-6">
         <div class="mb-10">
-          <h2 class="text-xl font-semibold mb-2">Типы документов</h2>
-          <div class="flex items-center gap-2 mb-4">
-            <InputText v-model="newDocType" placeholder="Новый тип документа"/>
-            <Button label="Добавить" @click="addDocType"/>
+          <h2 class="text-xl font-semibold mb-4">Типы документов</h2>
+          
+          <div class="flex justify-start mb-4">
+            <Button label="Добавить тип документа" icon="pi pi-plus" @click="openDocTypeDialog(null)" />
           </div>
-          <ul class="space-y-2">
-
-            <li
-                v-for="(type, index) in (showAllDocTypes ? docTypes : docTypes.slice(0, 3))"
-                :key="type.id"
-                class="flex justify-between items-center border border-gray-200 p-2 rounded"
-            >
-              <div class="flex-1 mr-2">
-                <template v-if="editingTypeId === type.id">
-                  <InputText v-model="editedTypeName" class="w-full"/>
-                </template>
-                <template v-else>
-                  {{ type.name }}
-                </template>
+          
+          <DataTable
+              :value="docTypes"
+              :paginator="true"
+              :rows="7"
+              :rowsPerPageOptions="[5, 7, 10]"
+              stripedRows
+              responsiveLayout="scroll"
+              :filters="docTypeFilters"
+              :globalFilterFields="['name']"
+              class="w-full"
+          >
+            <template #header>
+              <div class="flex justify-start">
+                <IconField>
+                  <InputIcon>
+                    <i class="pi pi-search"/>
+                  </InputIcon>
+                  <InputText v-model="docTypeFilters['global'].value" placeholder="Поиск типов документов..."/>
+                </IconField>
               </div>
+            </template>
 
-              <div class="flex gap-2">
-                <template v-if="editingTypeId === type.id">
-                  <Button
-                      icon="pi pi-check"
-                      severity="success"
-                      text
-                      @click="saveEditedDocType(type.id)"
-                  />
-                  <Button
-                      icon="pi pi-times"
-                      severity="secondary"
-                      text
-                      @click="cancelEditing"
-                  />
-                </template>
-                <template v-else>
-                  <Button
-                      icon="pi pi-pencil"
-                      severity="secondary"
-                      text
-                      @click="startEditingDocType(type)"
-                  />
-                  <Button
-                      icon="pi pi-trash"
-                      severity="danger"
-                      text
-                      @click="deleteDocType(type.id)"
-                  />
-                </template>
+            <Column field="id" sortable header="ID" style="width: 80px"/>
+            <Column field="name" sortable header="Название"/>
+            <Column header="Действия" style="width: 150px">
+              <template #body="slotProps">
+                <Button
+                    icon="pi pi-pencil"
+                    severity="secondary"
+                    size="small"
+                    text
+                    @click="openDocTypeDialog(slotProps.data)"
+                />
+                <Button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    size="small"
+                    text
+                    @click="deleteDocType(slotProps.data.id)"
+                />
+              </template>
+            </Column>
+          </DataTable>
+          
+          <!-- Диалог для создания/редактирования типа документа -->
+          <Dialog v-model:visible="docTypeDialogVisible" header="Тип документа" :modal="true" :closable="true">
+            <div class="flex flex-col gap-4">
+              <label>Название типа документа</label>
+              <InputText v-model="editedDocType.name" placeholder="Введите название"/>
+              <div class="flex justify-end gap-2 mt-4">
+                <Button label="Отмена" severity="secondary" @click="docTypeDialogVisible = false"/>
+                <Button label="Сохранить" @click="saveDocType"/>
               </div>
-            </li>
-
-          </ul>
-          <Button
-              v-if="docTypes.length > 3"
-              :label="showAllDocTypes ? 'Скрыть' : 'Показать все'"
-              icon="pi pi-chevron-down"
-              text
-              @click="showAllDocTypes = !showAllDocTypes"
-              class="mt-2"
-          />
+            </div>
+          </Dialog>
         </div>
 
         <div>
-          <h2 class="text-xl font-semibold mb-2">Службы</h2>
-          <div class="flex items-center gap-2 mb-4">
-            <InputText v-model="newDepartment" placeholder="Новая служба"/>
-            <Button label="Добавить" @click="addDepartment"/>
+          <h2 class="text-xl font-semibold mb-4">Службы</h2>
+          
+          <div class="flex justify-start mb-4">
+            <Button label="Добавить службу" icon="pi pi-plus" @click="openDepartmentDialog(null)" />
           </div>
-          <ul class="space-y-2">
-            <li
-                v-for="(dep, index) in (showAllDepartments ? departments : departments.slice(0, 3))"
-                :key="dep.id"
-                class="flex justify-between items-center border border-gray-200 p-2 rounded"
-            >
-              <span>{{ dep.name }}</span>
-              <Button icon="pi pi-trash" severity="danger" text @click="deleteDepartment(dep.id)"/>
-            </li>
-          </ul>
-          <Button
-              v-if="departments.length > 3"
-              :label="showAllDepartments ? 'Скрыть' : 'Показать все'"
-              icon="pi pi-chevron-down"
-              text
-              @click="showAllDepartments = !showAllDepartments"
-          />
+          
+          <DataTable
+              :value="departments"
+              :paginator="true"
+              :rows="7"
+              :rowsPerPageOptions="[5, 7, 10]"
+              stripedRows
+              responsiveLayout="scroll"
+              :filters="departmentFilters"
+              :globalFilterFields="['name']"
+              class="w-full"
+          >
+            <template #header>
+              <div class="flex justify-start">
+                <IconField>
+                  <InputIcon>
+                    <i class="pi pi-search"/>
+                  </InputIcon>
+                  <InputText v-model="departmentFilters['global'].value" placeholder="Поиск служб..."/>
+                </IconField>
+              </div>
+            </template>
+
+            <Column field="id" sortable header="ID" style="width: 80px"/>
+            <Column field="name" sortable header="Название"/>
+            <Column header="Действия" style="width: 150px">
+              <template #body="slotProps">
+                <Button
+                    icon="pi pi-pencil"
+                    severity="secondary"
+                    size="small"
+                    text
+                    @click="openDepartmentDialog(slotProps.data)"
+                />
+                <Button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    size="small"
+                    text
+                    @click="deleteDepartment(slotProps.data.id)"
+                />
+              </template>
+            </Column>
+          </DataTable>
+          
+          <!-- Диалог для создания/редактирования службы -->
+          <Dialog v-model:visible="departmentDialogVisible" header="Служба" :modal="true" :closable="true">
+            <div class="flex flex-col gap-4">
+              <label>Название службы</label>
+              <InputText v-model="editedDepartment.name" placeholder="Название службы"/>
+              <div class="flex justify-end gap-2 mt-4">
+                <Button label="Отмена" severity="secondary" @click="departmentDialogVisible = false"/>
+                <Button label="Сохранить" @click="saveDepartment"/>
+              </div>
+            </div>
+          </Dialog>
         </div>
 
         <div>
-          <h2 class="text-xl font-semibold mb-2">Ответственный в службе</h2>
+          <h2 class="text-xl font-semibold mb-4">Ответственные по службам</h2>
 
           <div class="flex items-center gap-2 mb-4">
             <!-- Выбор пользователя -->
@@ -513,24 +599,47 @@ onMounted(() => {
             <Button label="Добавить" @click="assignResponsible"/>
           </div>
 
-          <ul class="space-y-2">
-            <li
-                v-for="res in (responsibles && showAllAssign ? responsibles : responsibles?.slice(0, 3) || [])"
-                :key="res.id"
-                class="flex justify-between items-center border border-gray-200 p-2 rounded"
-            >
-              <span>{{ res.user_name }} - {{ res.department_name?.name || 'Без отдела' }}</span>
+          <DataTable
+              :value="responsibles"
+              :paginator="true"
+              :rows="7"
+              :rowsPerPageOptions="[5, 7, 10]"
+              stripedRows
+              responsiveLayout="scroll"
+              :filters="responsibleFilters"
+              :globalFilterFields="['user_name', 'department_name']"
+              class="w-full"
+          >
+            <template #header>
+              <div class="flex justify-start">
+                <IconField>
+                  <InputIcon>
+                    <i class="pi pi-search"/>
+                  </InputIcon>
+                  <InputText v-model="responsibleFilters['global'].value" placeholder="Поиск ответственных..."/>
+                </IconField>
+              </div>
+            </template>
 
-              <Button icon="pi pi-trash" severity="danger" text @click="deleteResponsible(res.id)"/>
-            </li>
-          </ul>
-          <Button
-              v-if="responsibles.length > 3"
-              :label="showAllAssign ? 'Скрыть' : 'Показать все'"
-              icon="pi pi-chevron-down"
-              text
-              @click="showAllAssign = !showAllAssign"
-          />
+            <Column field="id" sortable header="ID" style="width: 80px"/>
+            <Column field="user_name" sortable header="Сотрудник"/>
+            <Column header="Служба">
+              <template #body="slotProps">
+                {{ slotProps.data.department_name?.name || slotProps.data.department_name || 'Без отдела' }}
+              </template>
+            </Column>
+            <Column header="Действия" style="width: 100px">
+              <template #body="slotProps">
+                <Button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    size="small"
+                    text
+                    @click="deleteResponsible(slotProps.data.id)"
+                />
+              </template>
+            </Column>
+          </DataTable>
         </div>
       </div>
     </div>

@@ -4,3 +4,38 @@
 [2025-08-07 13:00:39] [ERROR] [errors] — Ошибка обновления файла: 54
 [2025-08-07 13:38:29] [ERROR] [errors] — Неудачная попытка входа: username='user1' password='password'
 [2025-08-07 13:38:32] [ERROR] [errors] — Ошибка проверки аутентификации, нет токена
+[2025-08-07 13:55:04] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 13:55:14] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 13:55:21] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 13:55:30] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 13:56:39] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 13:57:22] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 13:58:58] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 13:58:58] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 13:59:38] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:07:25] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:08:06] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:08:28] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:08:33] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:08:40] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:08:45] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:08:49] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:08:59] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:09:17] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:11:33] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:11:33] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:11:40] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:11:40] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:12:02] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:12:02] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:16:49] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:20:00] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:20:09] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:20:15] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:20:20] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:20:29] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:21:12] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 14:53:16] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 15:06:37] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 15:12:49] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1
+[2025-08-07 15:14:36] [WARNING] [errors] — Найдена запись Responsible с id=4, где user или department равны None. user_id=56, department_id=1

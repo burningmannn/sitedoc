@@ -30,6 +30,9 @@ export default defineNuxtConfig({
                     darkModeSelector: '.white',
                 }
             }
+        },
+        components: {
+            include: '*'
         }
     }
 })

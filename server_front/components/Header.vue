@@ -15,9 +15,12 @@ onMounted(() => {
     notificationStore.fetchNotifications()
 
     // Обновление уведомлений каждые 30 секунд
-    setInterval(() => {
+    const intervalId = setInterval(() => {
       notificationStore.fetchNotifications()
     }, 30000)
+    
+    // Сохраняем интервал в auth store для управления
+    authStore.addNotificationInterval(intervalId)
   }
 })
 

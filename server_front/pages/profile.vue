@@ -35,12 +35,17 @@ const fetchData = async () => {
 
 onMounted(() => {
   // authStore.checkAuth()
+  const authStore = useAuthStore()
+  
   notificationStore.fetchNotifications()
   fetchData()
 
-  setInterval(() => {
+  const intervalId = setInterval(() => {
     notificationStore.fetchNotifications()
   }, 30000)
+  
+  // Сохраняем интервал в auth store для управления
+  authStore.addNotificationInterval(intervalId)
 })
 </script>
 

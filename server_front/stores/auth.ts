@@ -14,6 +14,7 @@ export const useAuthStore = defineStore('auth', {
             admin: boolean
         },
         isAuthLoaded: false,
+        notificationIntervals: [] as NodeJS.Timeout[],
     }),
     actions: {
         setUser(userData: User) {
@@ -31,10 +32,25 @@ export const useAuthStore = defineStore('auth', {
                 this.user = null
                 this.isAuthLoaded = false
                 console.log('Проверка авторизации не удалась, пользователь не авторизован')
+                
+                // Если ошибка 401, перенаправляем на логин
+                if (e?.status === 401 || e?.statusCode === 401) {
+                    if (process.client && window.location.pathname !== '/login') {
+                        await navigateTo('/login')
+                    }
+                }
             }
         },
         async logout() {
             const config = useRuntimeConfig()
+            
+            // Очищаем все интервалы уведомлений
+            this.clearNotificationIntervals()
+            
+            // Очищаем уведомления
+            const notificationStore = useNotificationStore()
+            notificationStore.clearNotifications()
+            
             try {
                 await $fetch(`${config.public.apiBase}/api/auth/logout`, {
                     method: 'POST',
@@ -53,6 +69,18 @@ export const useAuthStore = defineStore('auth', {
         clearUser() {
             this.user = null
             this.isAuthLoaded = false
+            // Также очищаем интервалы при очистке пользователя
+            this.clearNotificationIntervals()
+        },
+        addNotificationInterval(intervalId: NodeJS.Timeout) {
+            this.notificationIntervals.push(intervalId)
+        },
+        clearNotificationIntervals() {
+            // Очищаем все активные интервалы
+            this.notificationIntervals.forEach(intervalId => {
+                clearInterval(intervalId)
+            })
+            this.notificationIntervals = []
         }
     },
     persist: true
